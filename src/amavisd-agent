@@ -1,0 +1,89 @@
+#!/bin/bash
+: <<=cut
+
+=head1 NAME
+
+amavisd-agent - plugin to monitor the amavis mail filter.
+
+=head1 APPLICABLE SYSTEMS
+
+FIXME
+
+=head1 CONFIGURATION
+
+FIXME
+
+=over 4
+
+=item FIXME
+
+FIXME
+
+=back
+
+FIXME
+
+=head2 EXAMPLE CONFIGURATION
+
+FIXME
+
+=head1 INTERPRETATION
+
+FIXME
+
+=head1 MAGIC MARKERS
+
+  #%# family=auto
+  #%# capabilities=autoconf
+
+=head1 VERSION
+
+FIXME
+
+=head1 BUGS
+
+FIXME
+
+=head1 AUTHOR
+
+FIXME
+
+=head1 LICENSE
+
+GPLv2
+
+=cut
+
+#AMAVISD_AGENT=${amavisdagent:/usr/sbin/amavisd-agent}
+AMAVISD_AGENT=/usr/sbin/amavisd-agent
+
+if [ "$1" = "autoconf" ]; then
+        if [ -x "${AMAVISD_AGENT}" ] ; then
+                echo yes
+                exit 0
+        else
+                echo no
+                exit 0
+        fi
+fi
+
+if [ "$1" = "config" ]; then
+    echo "graph_title Amavis mail throughput";
+    echo "graph_category mail";
+    echo "graph_vlabel mails/\${graph_period}";
+    echo "graph_period minute";
+    echo "graph_args --base 1000 -l 0";
+    echo "graph_scale no";
+    echo "graph_total mails";
+    ($AMAVISD_AGENT -c 1 | grep -P '^Content.*Msgs\b' | cut -b8-) | while read TYPE NUM FOO; do
+      echo "${TYPE}.label ${TYPE}";
+      echo "${TYPE}.type DERIVE";
+      echo "${TYPE}.min 0";
+      echo "${TYPE}.draw AREASTACK";
+    done
+    exit 0
+fi
+
+while read TYPE NUM FOO; do
+  echo ${TYPE}.value $NUM;
+done < <($AMAVISD_AGENT -c 1 | grep -P '^Content.*Msgs\b' | cut -b8-)

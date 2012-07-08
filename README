@@ -1,0 +1,14 @@
+Amavisd-agent plugin for munin
+
+Why?
+Other plugins parse logs in an ugly way.
+Amavis now has infrastructure for this with an agent that gets it for you.
+
+How?
+# cat > /etc/munin/plugin-conf.d/amavisd-agent << FOO
+[amavisd-agent]
+   user amavis
+FOO
+
+Then put this in your munin plugin path and autoconf.
+
